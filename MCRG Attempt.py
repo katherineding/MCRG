@@ -1,30 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # MCRG Code following Swendsen Description circa 1982
-
-# In[4]:
-
+# # MCRG Code following Swendsen Description circa 1982 
+#   With Metropolis Hastings MC updates
 
 from __future__ import division #safeguard against evil floor division
-
 import numpy as np
 from scipy import linalg as la
 import matplotlib.pyplot as plt
 import timeit
-get_ipython().run_line_magic('load_ext', 'line_profiler')
-
 np.set_printoptions(precision = 3,suppress=False)
 
 
-# ## 2D Ising Model, periodic B.C., initial Hamiltonian contains only nearest neighbor interactions
-
-# $$\mathcal{H} = -\beta H_\Omega = K\sum_{\langle i,j\rangle} \sigma_i \sigma_j + h\sum_{i = 0}^{N_s} \sigma_i$$
-
-# ### Block spin transform, scale factor = b 
-
-# In[5]:
-
+### Block spin transform, scale factor = b 
 
 def assignBlockSpin(total):
     '''Rule for assigning block spin value. Random tiebreaker'''
@@ -35,9 +23,6 @@ def assignBlockSpin(total):
     else:
         s = np.random.choice([-1,1])
     return s
-
-
-# In[6]:
 
 
 def RGTransform(S,b):
@@ -54,116 +39,7 @@ def RGTransform(S,b):
     return newS
 
 
-# ### First 7 short range even couplings
-
-# In[7]:
-
-
-def N1Coupl(S):
-    '''for spin field config S, 
-    measure sum SiSj for i,j that are nearest neighbors, dir = (1,0)'''
-    L = S.shape[0];
-    assert L >=2, "Lattice too small for NN interaction"
-    val = 0.0;
-    for j in np.arange(L):
-        for i in np.arange(L):
-            val += S[i,j]*(S[i,(j+1)%L] + S[(i+1)%L,j])
-    return val
-
-
-# In[8]:
-
-
-def N2Coupl(S):
-    '''for spin field config S, 
-    measure sum SiSj for i,j that are next-nearest neighbors, dir = (1,1)'''
-    L = S.shape[0];
-    assert L >=2, "Lattice too small for next nearest neighbor interaction"
-    val = 0.0;
-    for j in np.arange(L):
-        for i in np.arange(L):
-            val += S[i,j]*(S[(i+1)%L,(j+1)%L] + S[(i-1)%L,(j+1)%L])
-    return val
-
-
-# In[9]:
-
-
-def N3Coupl(S):
-    '''for spin field config S, 
-    measure sum SiSj for i,j that are third-nearest neighbors,dir = (2,0)'''
-    L = S.shape[0];
-    assert L >=3, "Lattice too small for third nearest neighbor interaction"
-    val = 0.0;
-    for j in np.arange(L):
-        for i in np.arange(L):
-            val += S[i,j]*(S[i,(j+2)%L] + S[(i+2)%L,j])
-    return val
-
-
-# In[10]:
-
-
-def N4Coupl(S):
-    '''for spin field config S, 
-    measure sum SiSj for i,j that are 4th-nearest neighbors, dir = (2,1)'''
-    L = S.shape[0];
-    assert L >=3, "Lattice too small for 4th nearest neighbor interaction"
-    val = 0.0;
-    for j in np.arange(L):
-        for i in np.arange(L):
-            val += S[i,j]*(S[(i+1)%L,(j+2)%L] + S[(i+2)%L,(j+1)%L] 
-                           +S[(i-1)%L,(j+2)%L] + S[(i-2)%L,(j+1)%L])
-    return val
-
-
-# In[11]:
-
-
-def N5Coupl(S):
-    '''for spin field config S, 
-    measure sum SiSj for i,j that are 5th-nearest neighbors,dir = (2,2)'''
-    L = S.shape[0];
-    assert L >=3, "Lattice too small for third nearest neighbor interaction"
-    val = 0.0;
-    for j in np.arange(L):
-        for i in np.arange(L):
-            val += S[i,j]*(S[(i+2)%L,(j+2)%L] + S[(i-2)%L,(j+2)%L])
-    return val
-
-
-# In[12]:
-
-
-def PlaqCoupl(S):
-    '''for spin field config S, 
-    measure sum SiSjSlSk for i,j,k,l that form 1 plaquette,'''
-    L = S.shape[0];
-    assert L >=2, "Lattice too small to form plaquettes"
-    val = 0.0;
-    for j in np.arange(L):
-        for i in np.arange(L):
-            val += S[i,j]*S[i,(j+1)%L]*S[(i+1)%L,(j+1)%L]*S[(i+1)%L,j]
-    return val
-
-
-# In[13]:
-
-
-def SubPlaqCoupl(S):
-    '''for spin field config S, 
-    measure sum SiSjSlSk for i,j,k,l that form 1 sublattice plaquette,'''
-    L = S.shape[0];
-    assert L >=3, "Lattice too small to form sublattice plaquettes"
-    val = 0.0;
-    for j in np.arange(L):
-        for i in np.arange(L):
-            val += S[(i+1)%L,j]*S[i,(j+1)%L]*S[(i-1)%L,j]*S[i,(j-1)%L]
-    return val
-
-
-# In[14]:
-
+### First 7 short range even couplings
 
 def AllEvenCoupling(S):
     '''for spin field config S, 
@@ -184,73 +60,7 @@ def AllEvenCoupling(S):
     return val
 
 
-# ### First 4 short range odd couplings
-
-# In[15]:
-
-
-def Magnetization(S):
-    '''for spin field config S, 
-    measure sum Si = net magnetization of entire lattice'''
-    L = S.shape[0];
-    assert L >=1, "Lattice linear dim < 1"
-    val = np.sum(S);
-    return val
-
-
-# In[16]:
-
-
-def TripletPlaq(S):
-    '''for spin field config S, 
-    measure sum SiSjSk for i,j,k that lie on 1 plaquette,'''
-    L = S.shape[0];
-    assert L >=2, "Lattice too small to have 3 spins on a plaquette"
-    val = 0.0;
-    for j in np.arange(L):
-        for i in np.arange(L):
-            val += S[i,j]*S[(i+1)%L,j]*S[(i+1)%L,(j+1)%L];
-            val += S[i,j]*S[i,(j+1)%L]*S[(i-1)%L,(j+1)%L];
-            val += S[i,j]*S[(i-1)%L,j]*S[(i-1)%L,(j-1)%L];
-            val += S[i,j]*S[i,(j-1)%L]*S[(i+1)%L,(j-1)%L];
-    return val
-
-
-# In[17]:
-
-
-def TripletAngle(S):
-    '''for spin field config S, 
-    measure sum SiSjSk for i,j,k that lie at an angle,'''
-    L = S.shape[0];
-    assert L >=3, "Lattice too small to have 3 spins at an angle"
-    val = 0.0;
-    for j in np.arange(L):
-        for i in np.arange(L):
-            val += S[i,j]*S[(i+1)%L,j]*S[(i+2)%L,(j+1)%L];
-            val += S[i,j]*S[i,(j+1)%L]*S[(i-1)%L,(j+2)%L];
-            val += S[i,j]*S[(i-1)%L,j]*S[(i-2)%L,(j-1)%L];
-            val += S[i,j]*S[i,(j-1)%L]*S[(i+1)%L,(j-2)%L];
-    return val
-
-
-# In[18]:
-
-
-def TripletRow(S):
-    '''for spin field config S, 
-    measure sum SiSjSk for i,j,k that lie in a row,'''
-    L = S.shape[0];
-    assert L >=3, "Lattice too small have 3 spins in a row"
-    val = 0.0;
-    for j in np.arange(L):
-        for i in np.arange(L):
-            val += S[i,j]*(S[(i+1)%L,j]*S[(i+2)%L,j]                            + S[i,(j+1)%L]*S[i,(j+2)%L])
-    return val
-
-
-# In[19]:
-
+### first 4 short range couplings
 
 def AllOddCoupling(S):
     '''for spin field config S, 
@@ -274,11 +84,7 @@ def AllOddCoupling(S):
     val[0] = np.sum(S);
     return val
 
-
-# ### Integrated MC + RG simulation function
-
-# In[20]:
-
+### Integrated MC + RG simulation function
 
 def Energy(S):
     '''Brute force Find energy of spin configuration S for sanity check'''
@@ -290,12 +96,9 @@ def Energy(S):
     E += h*np.sum(S)
     return E
 
-
-# In[25]:
-
-
 def RunMCRG(K,h):
-    '''Run MCRG simulation to find y_t exponent, keeping Nc coupling terms'''
+    '''Run MCRG simulation to find y_t, y_h exponent, 
+    keeping Nc_even and Nc_odd coupling terms'''
     print('running MCRG for linear size',L,'lattice.')
     print('Setting K =', K, " and h = ",h)
     
@@ -320,7 +123,8 @@ def RunMCRG(K,h):
             for i in np.arange(L):
                 # calculate alpha based on energy difference
                 d_hterm = -2*h*S[i,j];
-                d_tterm = -2*K*S[i,j]*(S[(i+1) % L,j]+S[(i-1) % L,j]+S[i,(j+1)%L]+S[i,(j-1)%L])
+                d_tterm = -2*K*S[i,j]*(S[(i+1) % L,j]+S[(i-1) % L,j]
+                          +S[i,(j+1)%L]+S[i,(j-1)%L])
                 alpha = np.exp(d_tterm);
                 #Probability Min(1,alpha) of accepting flip 
                 #If accept, update sigma field
@@ -353,9 +157,9 @@ def RunMCRG(K,h):
     print('evenK = ',evenK)
     print('evenK_1 = ', evenK_1)
     print('mix_11 = ', mix_11)
-    print('subtract ',np.outer(evenK_1[0:Nc_even],evenK_1[0:Nc_even]))
+    print('subtract ',np.outer(evenK_1,evenK_1))
     print('mix_01 = ', mix_01)
-    print('subtract ',np.outer(evenK_1[0:Nc_even],evenK[0:Nc_even]))
+    print('subtract ',np.outer(evenK_1,evenK))
     MatA = mix_11-np.outer(evenK_1,evenK_1)
     MatC = mix_01-np.outer(evenK_1,evenK)
     #print('MatA (lhs) = ',MatA)
@@ -400,25 +204,20 @@ def RunMCRG(K,h):
     return y_t,y_h
 
 
-# ## Test for specific set of input parameters
+## Test for specific set of input parameters
 
-# ### Known: y_t = 1, y_h = 1.875 exactly
-
-# In[26]:
-
-
-# Input Parameters
-L = 64; #linear dimension of square lattice
+# Lattice and MC Parameters
+L = int(input("Linear Dimension of Lattice:"));
 Kc = np.arccosh(3)/4; # Critical temperature Kc assumed to be known
 K = Kc; h = 0; #Start on Critical manifold
+nwarm = int(input("number of warm up Monte Carlo sweeps:")); 
+nmeas = int(input("number of measurement Monte Carlo sweeps:"));
+interval = int(input("interval between data measurements: "));
 
-nwarm = 400; #number of warm up Monte Carlo sweeps.
-nmeas = 400; #number of measurement Monte Carlo sweeps.
-interval = 10; # Take data for correlation functions every (interval) MC-steps/site
 # RG analysis setting
-Nc_even = 1; #number of coupling constants included in calculating T
-Nc_odd = 1;
-b = 2; #scaling factor
+Nc_even = int(input("number of even coupling constants to consider:")); 
+Nc_odd = int(input("number of odd coupling constants to consider:"));
+b = 2; 
 
 # Derived constants
 ndata = nmeas//interval
@@ -427,31 +226,15 @@ energy = np.zeros((nmeas+nwarm)//interval,dtype=float)
 
 #Initialize 2d spin field
 S = np.random.choice([-1,1],(L,L))
-plt.imshow(S);plt.colorbar()
 #Initialize an array of random beta in [0,1] to use in M-Hastings
 beta_array = np.random.random_sample((nwarm+nmeas,L,L))
 
 
-# In[27]:
-
-
-get_ipython().run_line_magic('lprun', '-f RunMCRG RunMCRG(K,h)')
-#RunMCRG(K,h)
-
-
-# In[29]:
-
+## GO!
+RunMCRG(K,h)
 
 plt.plot(energy)
 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
 
 
 

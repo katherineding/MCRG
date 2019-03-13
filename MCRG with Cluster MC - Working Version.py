@@ -4,13 +4,12 @@
 # # MCRG Code following Swendsen Description circa 1982
 #   Using Wolff's Algorithm to combat critical slowing down
 
-
 from __future__ import division #safeguard against evil floor division
 import numpy as np
 from scipy import linalg as la
 import matplotlib.pyplot as plt
 import timeit
-np.set_printoptions(precision = 3,suppress=False)
+np.set_printoptions(suppress=True)
 
 
 ### Block spin transform, scale factor = b 
@@ -52,12 +51,12 @@ def AllEvenCoupling(S):
         for i in np.arange(L):
             val += [S[i,j]*(S[i,(j+1)%L] + S[(i+1)%L,j]), #nearest neighbor (1,0)
                     S[i,j]*(S[(i+1)%L,(j+1)%L] + S[(i-1)%L,(j+1)%L]), #next nearest neighbor (1,1)
+                    S[i,j]*S[i,(j+1)%L]*S[(i+1)%L,(j+1)%L]*S[(i+1)%L,j], # plaquette
                     S[i,j]*(S[i,(j+2)%L] + S[(i+2)%L,j]), #3rd nearest neighbor (2,0)
                     S[i,j]*(S[(i+1)%L,(j+2)%L] + S[(i+2)%L,(j+1)%L] 
                             +S[(i-1)%L,(j+2)%L] + S[(i-2)%L,(j+1)%L]),#4th nearest neighbor (2,1)
-                    S[i,j]*(S[(i+2)%L,(j+2)%L] + S[(i-2)%L,(j+2)%L]),#5th nearest neighbor (2,2)
-                    S[i,j]*S[i,(j+1)%L]*S[(i+1)%L,(j+1)%L]*S[(i+1)%L,j], # plaquette
-                    S[(i+1)%L,j]*S[i,(j+1)%L]*S[(i-1)%L,j]*S[i,(j-1)%L]] # sublattice plaquette
+                    S[(i+1)%L,j]*S[i,(j+1)%L]*S[(i-1)%L,j]*S[i,(j-1)%L], # sublattice plaquette
+                    S[i,j]*(S[(i+2)%L,(j+2)%L] + S[(i-2)%L,(j+2)%L])]#5th nearest neighbor (2,2)
     return val
 
 
@@ -238,32 +237,31 @@ def getExponent(MatA,MatC,Nc):
     '''get thermal or magnetic exponent based on output of RunMCRG
     and desired number of coupling constants to consider Nc'''
     LinRGMat = la.solve(MatA[0:Nc,0:Nc],MatC[0:Nc,0:Nc])
-    print('linearized RG transformation = ',LinRGMat)
+    #print('linearized RG transformation = ',LinRGMat)
     lmbd = la.eigvals(LinRGMat);
-    print('eigenvalues are',lmbd)
+    #print('eigenvalues are',lmbd)
     amplitude = np.absolute(lmbd)
-    print('eigenvalue amplitudes are',amplitude)
+    #print('eigenvalue amplitudes are',amplitude)
     #Only the eigenvalue with maximum amplitude is important.
     #This eigenvalue should generically be real
     imax = np.argmax(amplitude)
     y = np.log(lmbd[imax])/np.log(b)
-    print('exponent y = ',y,'\n')
+    #print('exponent y = ',y,'\n')
     return y
 
 ## Test for specific set of input parameters
 
 
-# Lattice and MC Parameters
+# Lattice and MC Parameters, Output File name
 L = int(input("Linear Dimension of Lattice: ")); 
 Kc = np.arccosh(3)/4; # Critical temperature Kc assumed to be known
 K = Kc; h = 0; #Start on Critical manifold
 nwarm = int(input("number of warm up Monte Carlo sweeps:")); 
 nmeas = int(input("number of measurement Monte Carlo sweeps:"));
 interval = int(input("interval between data measurements: "));
+filename = input('file name for output data: ')
 
 # RG analysis setting
-#Nc_even = int(input("number of even coupling constants to consider:")); 
-#Nc_odd = int(input("number of odd coupling constants to consider:"));
 b = 2; 
 
 # Derived constants
@@ -283,18 +281,36 @@ MatA_even, MatC_even, MatA_odd, MatC_odd = RunMCRG(K,h)
 #plt.plot(energy)
 #plt.plot(clustersize)
 
-yt_arr = np.empty(7,dtype = complex);
+yt_arr = np.empty(7, dtype = complex);
 yh_arr = np.empty(4, dtype = complex);
 
 for i in np.arange(7):
-  yt_arr[i] = getExponent(MatA_even,MatC_even,i+1)
+    yt_arr[i] = getExponent(MatA_even,MatC_even,i+1)
 
 for i in np.arange(4):
-  yh_arr[i] = getExponent(MatA_odd,MatC_odd,i+1)
+    yh_arr[i] = getExponent(MatA_odd,MatC_odd,i+1)
 
+print("mean cluster size as fraction of lattice size: ",np.mean(clustersize)/Ns)
 print("y_t array = ", yt_arr)
 print("y_h array = ", yh_arr)
 
+
+#WRITE DATA TO TEXT FILE
+f = open(filename,'w')
+print("================== SETTINGS ==================",file= f)
+print("L = ", L, "\n",file = f)
+print("K = ", K, "\n",file = f)
+print("h = ", h, "\n",file = f)
+print("b = ", b, "\n",file = f)
+print("nwarm = ", nwarm, "\n",file = f)
+print("nmeas = ", nmeas, "\n",file = f)
+print("interval = ", interval, "\n",file = f)
+print("ndata = ", ndata, "\n",file = f)
+print("================== RESULTS ===================", file = f)
+print("avg cluster size = ",np.mean(clustersize)/Ns, '*', Ns, "\n",file = f)
+print("y_t array = ", yt_arr,"\n",file = f)
+print("y_h array = ", yh_arr,"\n",file = f)
+f.close()
 
 
 

@@ -203,27 +203,19 @@ def RunMCRG(K,h):
     #Results
     evenK /= ndata; evenK_1 /= ndata; mix_11 /= ndata; mix_01 /= ndata;
     oddK /= ndata; oddK_1 /= ndata; mix_11_odd /= ndata; mix_01_odd /= ndata;
+
     print('evenK = ',evenK)
     print('evenK_1 = ', evenK_1)
     print('mix_11 = ', mix_11)
     print('subtract ',np.outer(evenK_1,evenK_1))
     print('mix_01 = ', mix_01)
     print('subtract ',np.outer(evenK_1,evenK))
-    MatA = mix_11-np.outer(evenK_1,evenK_1)
-    MatC = mix_01-np.outer(evenK_1,evenK)
-    #print('MatA (lhs) = ',MatA)
-    #print('MatC (rhs) = ',MatC)
-    LinRGMat = la.solve(MatA[0:Nc_even,0:Nc_even],MatC[0:Nc_even,0:Nc_even])
-    print('linearized RG transformation = ',LinRGMat)
-    lmbd = la.eigvals(LinRGMat);
-    print('eigenvalues are',lmbd)
-    amplitude = np.absolute(lmbd)
-    print('eigenvalue amplitudes are',amplitude)
-    #Only the eigenvalue with maximum amplitude is important.
-    #This eigenvalue should generically be real
-    imax = np.argmax(amplitude)
-    y_t = np.log(lmbd[imax])/np.log(b)
-    print('exponent y_t = ',y_t,'\n')
+    MatA_even = mix_11-np.outer(evenK_1,evenK_1)
+    MatC_even = mix_01-np.outer(evenK_1,evenK)
+    print('MatA_even (lhs) = ',MatA_even)
+    print('MatC_even (rhs) = ',MatC_even)
+    print('\n')
+
     
     print('oddK = ',oddK)
     print('oddK_1 = ', oddK_1)
@@ -232,11 +224,20 @@ def RunMCRG(K,h):
     print('mix_01 = ', mix_01_odd)
     print('subtract ', np.outer(oddK_1,oddK))
     #TODO: cancellation bad, how to avoid?
-    MatA = mix_11_odd-np.outer(oddK_1,oddK_1)
-    MatC = mix_01_odd-np.outer(oddK_1,oddK)
-    #print('MatA (lhs) = ',MatA)
-    #print('MatC (rhs) = ',MatC)
-    LinRGMat = la.solve(MatA[0:Nc_odd,0:Nc_odd],MatC[0:Nc_odd,0:Nc_odd])
+    MatA_odd = mix_11_odd-np.outer(oddK_1,oddK_1)
+    MatC_odd = mix_01_odd-np.outer(oddK_1,oddK)
+    print('MatA_odd (lhs) = ',MatA_odd)
+    print('MatC_odd (rhs) = ',MatC_odd)
+    print('\n')
+
+    
+    return MatA_even, MatC_even, MatA_odd, MatC_odd
+
+
+def getExponent(MatA,MatC,Nc):
+    '''get thermal or magnetic exponent based on output of RunMCRG
+    and desired number of coupling constants to consider Nc'''
+    LinRGMat = la.solve(MatA[0:Nc,0:Nc],MatC[0:Nc,0:Nc])
     print('linearized RG transformation = ',LinRGMat)
     lmbd = la.eigvals(LinRGMat);
     print('eigenvalues are',lmbd)
@@ -245,13 +246,9 @@ def RunMCRG(K,h):
     #Only the eigenvalue with maximum amplitude is important.
     #This eigenvalue should generically be real
     imax = np.argmax(amplitude)
-    y_h = np.log(lmbd[imax])/np.log(b)
-    plt.figure();
-    plt.imshow(S);plt.colorbar();
-    print('exponent y_h = ',y_h)
-    
-    return y_t,y_h
-
+    y = np.log(lmbd[imax])/np.log(b)
+    print('exponent y = ',y,'\n')
+    return y
 
 ## Test for specific set of input parameters
 
@@ -265,8 +262,8 @@ nmeas = int(input("number of measurement Monte Carlo sweeps:"));
 interval = int(input("interval between data measurements: "));
 
 # RG analysis setting
-Nc_even = int(input("number of even coupling constants to consider:")); 
-Nc_odd = int(input("number of odd coupling constants to consider:"));
+#Nc_even = int(input("number of even coupling constants to consider:")); 
+#Nc_odd = int(input("number of odd coupling constants to consider:"));
 b = 2; 
 
 # Derived constants
@@ -281,10 +278,22 @@ S = np.random.choice([-1,1],(L,L))
 
 
 ## GO!
-RunMCRG(K,h)
+MatA_even, MatC_even, MatA_odd, MatC_odd = RunMCRG(K,h)
 
-plt.plot(energy)
-plt.plot(clustersize)
+#plt.plot(energy)
+#plt.plot(clustersize)
+
+yt_arr = np.empty(7,dtype = complex);
+yh_arr = np.empty(4, dtype = complex);
+
+for i in np.arange(7):
+  yt_arr[i] = getExponent(MatA_even,MatC_even,i+1)
+
+for i in np.arange(4):
+  yh_arr[i] = getExponent(MatA_odd,MatC_odd,i+1)
+
+print("y_t array = ", yt_arr)
+print("y_h array = ", yh_arr)
 
 
 

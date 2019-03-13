@@ -3,6 +3,7 @@
 
 # # MCRG Code following Swendsen Description circa 1982 
 #   With Metropolis Hastings MC updates
+# # This version is NOT USED IN PRODUCTION
 
 from __future__ import division #safeguard against evil floor division
 import numpy as np

@@ -1,0 +1,72 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fullpage}
+\usepackage{hyperref}
+\usepackage{siunitx}
+\usepackage[overload]{empheq}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+
+%==== templates ====
+\iffalse
+%inserting code
+\lstinputlisting[style=Matlab-editor]{test.m}
+
+%insertng image
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{plot}
+\caption{Blah}
+\label{blahblah}
+\end{figure}
+
+%interting table
+\begin{table}[H]
+\centering
+\begin{tabular}{|c c c c|} 
+ \hline
+ Col1 & Col2 & Col2 & Col3 \\ 
+ \hline
+ 1 & 6 & 87837 & 787 \\ 
+ 2 & 7 & 78 & 5415 \\
+ 3 & 545 & 778 & 7507 \\
+ 4 & 545 & 18744 & 7560 \\
+ 5 & 88 & 788 & 6344 \\
+ \hline
+ \end{tabular}
+\end{table}
+\fi
+
+%==== document specific commands ====
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareRobustCommand{\qed}{\blacksquare}
+
+
+\title{PHYSICS 212 Final Paper Proposal}
+\author{Jixun Ding (SUID: 3624401)}
+\date{Feb 8, 2019}
+
+\begin{document}
+
+\maketitle
+
+I would like to follow a mixture of  \#4 and \#5 of the suggested paper topics. I would like to
+\begin{itemize}
+\item Study the Monte Carlo Renormalization Group (MCRG) and understand how it works.
+
+\item Write an implementation of MCRG for the Ising Model on a 2D square lattice, find the critical exponents, and compare my results to original work in literature\cite{Swendsen1979}.
+
+\item  Write an implementation of MCRG for the $O(3)$ Heisenberg model on a 2D square lattice and reproduce various results in original work in literature\cite{Shenker1980}. Confirm the model does not have a phase transition.
+
+\end{itemize}
+
+So far I have found: earliest formulation of MCRG by Ma\cite{Ma1976}; reviews of the methodology and results of MCRG by Gupta\cite{Gupta1986,Gupta1987}; two descriptions of MCRG by Swendsen\cite{Swendsen1982,Swendsen1984}. Textbook by Binder\cite{Binder2014} provide general background on Monte Carlo methods applied to statistical physics problems and a modern perspective on MCRG.
+
+\bibliographystyle{siam}
+\bibliography{proposalref}
+
+\end{document}

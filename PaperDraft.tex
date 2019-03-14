@@ -9,6 +9,8 @@
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{indentfirst}
+\usepackage{listings}
+
 
 %==== templates ====
 \iffalse
@@ -239,5 +241,15 @@ From the above, we can see that:
 
 \bibliographystyle{ieeetr}
 \bibliography{paperref}
+
+\appendix
+
+\section*{Appendix: My Code}
+\lstinputlisting[language=Python]{"MCRG with Cluster MC - Working Version.py"}
+
+\iffalse
+
+\inputminted[]{python}{"MCRG with Cluster MC - Working Version.py"}
+\fi
 
 \end{document}

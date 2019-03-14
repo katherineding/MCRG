@@ -8,8 +8,6 @@ from __future__ import division #safeguard against evil floor division
 import numpy as np
 from scipy import linalg as la
 import matplotlib.pyplot as plt
-import timeit
-np.set_printoptions(suppress=True)
 
 
 ### Block spin transform, scale factor = b 
@@ -187,7 +185,8 @@ def RunMCRG(K,h):
             
         # take measurements every (interval) steps if finished warmup
         if n % interval == 0 and n >= nwarm:
-            print('iteration', n)
+            if n % 100 == 0:
+                print("iteration",n)
             S1 = RGTransform(S,b);
             evenK += AllEvenCoupling(S)
             evenK_1 += AllEvenCoupling(S1)
@@ -297,7 +296,7 @@ print("y_h array = ", yh_arr)
 
 
 #WRITE DATA TO TEXT FILE
-f = open(filename,'w')
+f = open("data/"+filename+'.txt','w')
 print("================== SETTINGS ==================",file= f)
 print("L = ", L, "\n",file = f)
 print("K = ", K, "\n",file = f)
@@ -309,10 +308,16 @@ print("interval = ", interval, "\n",file = f)
 print("ndata = ", ndata, "\n",file = f)
 print("================== RESULTS ===================", file = f)
 print("avg cluster size = ",np.mean(clustersize)/Ns, '*', Ns, "\n",file = f)
+print('MatA_even (lhs) = ',MatA_even, "\n",file = f)
+print('MatC_even (rhs) = ',MatC_even, "\n",file = f)
+print('MatA_odd (lhs) = ',MatA_odd, "\n",file = f)
+print('MatC_odd (rhs) = ',MatC_odd, "\n",file = f)
 print("y_t array = ", yt_arr,"\n",file = f)
 print("y_h array = ", yh_arr,"\n",file = f)
 f.close()
 
+
+print("wrote run data to: data/"+filename+'.txt')
 
 
 

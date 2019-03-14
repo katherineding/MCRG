@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.6960 64-bit) (preloaded format=pdflatex 2019.2.8)  14 MAR 2019 14:40
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.6960 64-bit) (preloaded format=pdflatex 2019.2.8)  14 MAR 2019 16:13
 entering extended mode
 **./PaperDraft.tex
 (PaperDraft.tex
@@ -867,25 +867,25 @@ Overfull \hbox (16.24992pt too wide) in paragraph at lines 175--176
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[8] [9]
-Overfull \hbox (10.24986pt too wide) in paragraph at lines 292--293
+[8] [9] [10]
+Overfull \hbox (10.24986pt too wide) in paragraph at lines 293--294
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[10])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 257.
+)
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 255.
  [11]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 257.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 255.
  (PaperDraft.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 257.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 257.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 255.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 255.
 Package rerunfilecheck Info: File `PaperDraft.out' has not changed.
 (rerunfilecheck)             Checksum: A17B2A8DC86FB12B8261AE422439E2C1;144.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 257.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 255.
  ) 
 Here is how much of TeX's memory you used:
- 20905 strings out of 492946
- 386126 string characters out of 3126267
+ 20906 strings out of 492946
+ 386142 string characters out of 3126267
  649138 words of memory out of 3000000
  24294 multiletter control sequences out of 15000+200000
  543680 words of font info for 69 fonts, out of 3000000 for 9000
@@ -909,9 +909,9 @@ s/kathe/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy5.
 pfb><C:/Users/kathe/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfon
 ts/cm/cmsy7.pfb><C:/Users/kathe/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/p
 ublic/amsfonts/cm/cmti10.pfb>
-Output written on PaperDraft.pdf (11 pages, 276891 bytes).
+Output written on PaperDraft.pdf (11 pages, 277057 bytes).
 PDF statistics:
- 550 PDF objects out of 1000 (max. 8388607)
- 356 named destinations out of 1000 (max. 500000)
+ 551 PDF objects out of 1000 (max. 8388607)
+ 357 named destinations out of 1000 (max. 500000)
  25 words of extra memory for PDF output out of 10000 (max. 10000000)
 

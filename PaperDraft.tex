@@ -56,19 +56,32 @@
 \section{Introduction}
 Monte Carlo Renormalization Group (MCRG) is a computational method for investigating critical phenomena in thermodynamical systems by combining
 standard Monte Carlo simulations with real space renormalization
-group analysis. In this work, I follow a description of MCRG by Swendsen~\cite{SwendsenDetail} and Binder~\cite{Binder2014}. I apply MCRG to extract critical exponents of the Ising Model on a two dimensional square lattice. We know the exact critical exponents for the Ising Model in two dimensions~\cite{Onsager1944}, so this is a good check for the validity of the MCRG method.
+group analysis. In this work, I follow a description of MCRG by Swendsen~\cite{SwendsenDetail} and Binder~\cite{Binder2014}. I apply MCRG to extract critical exponents of the Ising Model on a two dimensional square lattice. Exact critical exponents for the Ising Model in two dimensions are known~\cite{Onsager1944}, so this is a good check for the validity of the MCRG method.
+
+Consider a Hamiltonian of the form
+\begin{equation}
+\mathcal{H} = \sum_{\alpha} K_\alpha S_\alpha
+\end{equation}
+where $\{S_\alpha\}$ are sums of products of spin operators and the $\{K_\alpha\}$ are the corresponding dimensionless coupling constants with factors of $-\beta$ absorbed. Some examples of $S_\alpha$ are:
+\begin{equation*}
+S_{h} = \sum_{i} \sigma_i \quad S_{nn} = \sum_{\langle ij \rangle} \sigma_i\sigma_j \quad S_{plaq} = \sum_{\substack{i,j,k,l\\ \text{on a plaquette}} } \sigma_i\sigma_j\sigma_k\sigma_l
+\end{equation*}
+Applying a renormalization group transformation to the above system integrates out some short range degrees of freedom and produces a new, effective Hamiltonian $\mathcal{H'}$, parametrized by a new set of coupling constants $\{K'_\alpha\}$
 
 MORE THEORY : MC
 MORE THEORY: RG
+\begin{equation} 
+\sum_{i=0}^{\infty} a_i x^i \label{LinRGMat}
+\end{equation}
 
 \section{Simulation Method}
-Consider a system $\Omega$ of Ising spins $\sigma_i = \pm 1$ situated on a two dimensional $(d = 2)$ square lattice with linear dimension $L$ and lattice spacing 1. Then the total number of lattice sites is $N_s = L^2$. We use priodic boundary conditions. For simplicity, we start our analysis with a microscopic Hamiltonian with only nearest neighbor interactions:
-\begin{equation*}
-\mathcal{H} = -\beta H_\Omega = K\sum_{\langle i,j\rangle} \sigma_i \sigma_j + h\sum_{i = 0}^{N_s} \sigma_i
-\end{equation*}
-and set coupling constants to the known critical values $(K = K_c, h = 0)$. As discussed previously, because we have started on the critical manifold, as we repeatedly apply renormalization group transformations, the system will be moved towards the critical fixed point $\vec{K^*}$. (With finite precision numbers, we are not \textit{exactly} starting \textit{on} the critical manifold, but we still expect the system to move towards the fixed point in the few RG iterations that we apply before diverging along one of the relevant directions.)
+Consider a system $\Omega$ of Ising spins $\sigma_i = \pm 1$ situated on a two dimensional $(d = 2)$ square lattice with linear dimension $L$ and lattice spacing 1. Then the total number of lattice sites is $N_s = L^2$. For simplicity, we start our analysis with a microscopic Hamiltonian with only nearest neighbor interactions:
+\begin{equation}
+\mathcal{H^{(0)}} = -\beta H_\Omega = K\sum_{\langle i,j\rangle} \sigma_i \sigma_j + h\sum_{i = 0}^{N_s} \sigma_i
+\end{equation}
+and set coupling constants to the known critical values $(K = K_c, h = 0)$. We use priodic boundary conditions. As discussed previously, because we have started on the critical manifold, as we repeatedly apply renormalization group transformations, the system will be moved towards the critical fixed point $\vec{K^*}$. After applying $n$ RG transformations, we produce the linearized RG matrix $T_{\alpha\beta}^{(n)}$ using Eq.~\ref{LinRGMat}, and find its eigenvalues in order to get estimates of critical exponents. As $n$ increases, we expect $T_{\alpha\beta}^{(n)}$ to approach its theoretical value $T_{\alpha\beta}|_{\vec{K^*}}$. (With finite precision numbers, we are not \textit{exactly} starting \textit{on} the critical manifold, but we still expect the system to move towards the fixed point $\vec{K^*}$ in the few RG iterations that we apply before diverging along one of the relevant directions.) 
 
-For the standard Monte Carlo part, I choose to use the Metropolis-Hastings method to generate spin configurations. The Monte Carlo simulation settings for a few different lattice sizes are listed in Table~\ref{MCSettings}.
+For the standard Monte Carlo part, I choose to use Wolff's Algorithm~\cite{Wolff1989} to generate spin configurations. [OPTIONAL The average size of spin clusters $\langle c \rangle / N_s$ flipped at each step in Wolff's algorithm is monitored, and] measurements of spin-spin correlation functions are taken every $\Delta_N$ steps to ensure that successive measurements are uncorrelated. $\Delta_N$ is chosen based on $\langle c \rangle / N_s$. The Monte Carlo simulation settings for a few different lattice sizes are listed in Table~\ref{MCSettings}. A variety of lattice sizes are used because we want to examine how finite lattice sizes impact the renormalization group analysis.
 
 \begin{table}[H]
 \centering
@@ -76,13 +89,13 @@ For the standard Monte Carlo part, I choose to use the Metropolis-Hastings metho
  \hline
  Lattice linear dimension $L$ & 64 & 32 & 16 & 8 \\ 
  \hline
- \# of burn-in steps $N_{warm}$ & $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $2\times 10^4$ \\ 
+ \# of burn-in steps $N_{warm}$ & $2\times 10^4$& $1\times 10^4$& $0.5\times 10^4$& $0.2\times 10^4$ \\ 
  \hline
- \# of measurement steps $N_{meas}$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $20\times 10^4$\\
+ \# of measurement steps $N_{meas}$& $50\times 10^4$& $40\times 10^4$& $20\times 10^4$& $10\times 10^4$\\
  \hline
- \# of MC steps between measurements $\Delta_N$ & 10 & 10 & 10 & 10 \\
+ \# of MC steps between measurements $\Delta_N$ & 10 & 8 & 5 & 5 \\
  \hline
- \# of samples $N_{data} = N_{meas}/\Delta_{N}$ & $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $2\times 10^4$ \\
+ \# of samples $N_{data} = N_{meas}/\Delta_{N}$ & $5\times 10^4$& $5\times 10^4$& $4\times 10^4$& $2\times 10^4$ \\
  \hline
  \end{tabular}
  \caption{\label{MCSettings}Monte Carlo simulation settings}
@@ -90,25 +103,22 @@ For the standard Monte Carlo part, I choose to use the Metropolis-Hastings metho
 
 For the renormalization group analysis part, I use a simple block-spin transformation with scale factor $b = 2$. The renormalized block-spin value is determined by majority rule, with ties broken by random assignments of $+1$ and $-1$.  
 
-//TODO: DIAGRAM
 
-(CHECK FACT)Due to a special symmetry of the two dimensional square lattice, we can analyze the even and odd coupling constants in the Hamiltonian separately. In other words, we can suppose that renormalization group transformations do not mix even and odd coupling constant spaces. For our purposes, the largest (in magnitude) eigenvalue $\lambda_e$ of the linearized RG transformation matrix for even coupling constants produce the thermal exponent $y_T$ via:
-\begin{equation*}
+Due to the $\{\sigma_i\} \leftrightarrow \{-\sigma_i\}$ symmetry of our model, we can analyze the even and odd coupling constants in the Hamiltonian separately. In other words, we can suppose that the block spin transformations do not mix even and odd coupling constant spaces. The largest (in magnitude) eigenvalue $\lambda_e$ of the linearized RG transformation matrix $T_{\alpha\beta}$ for even coupling constants produce the thermal exponent $y_T$ via:
+\begin{equation}
 y_T = \frac{\log \lambda_e}{\log b}
-\end{equation*}
-
-The largest (in magnitude) eigenvalue $\lambda_o$ of the linearized RG transformation matrix for odd coupling constants produce the megnetization exponent $y_H$ via:
-\begin{equation*}
+\end{equation}
+The largest (in magnitude) eigenvalue $\lambda_o$ of the linearized RG transformation matrix $T_{\alpha\beta}$ for odd coupling constants  produce the megnetization exponent $y_H$ via:
+\begin{equation}
 y_H = \frac{\log \lambda_o}{\log b}
-\end{equation*}
+\end{equation}
 
 From Onsager's exact solution \cite{Onsager1944} we know the exact critical exponents of the Ising model in two dimensions are $\nu = 1 ,\  \eta = 1/4$. So we expect to find
 \begin{equation*}
 y_T = 1/\nu = 1 \qquad y_H = d-\frac{d-2+\eta}{2}= \frac{15}{8}
 \end{equation*}
 
-The even coupling constants that are considered in the RG analysis
-are given in Table.~\ref{even}. 
+In order to examine the effect of coupling constant space truncation in evaluating $T_{\alpha\beta}$ , coupling constants are added into the analysis one by one. [Equivalently, the $T_{\alpha\beta}$ matrix is of size $N_c$ by $N_c$, where $N_c$ is the number of coupling constants included in the $RG$ analysis.] The even coupling constants that are one-by-one added to the RG analysis are given in Table ~\ref{even}. 
 
 \begin{table}[H]
 \centering
@@ -116,22 +126,21 @@ are given in Table.~\ref{even}.
  \hline
 \multicolumn{2}{|c|}{Even couplings} \\ 
  \hline
- Notation & Meaning\\
+ Name & Meaning\\
  \hline
  $K_1$ & nearest neighbor $(0,0)$ - $(1,0)$\\
  $K_2$ & next-nearest neighbor $(0,0)$ - $(1,1)$\\
- $K_3$ & third nearest neighbor $(0,0)$ - $(2,0)$\\
- $K_4$ & fourth nearest neighbor $(0,0)$ - $(2,1)$\\
- $K_5$ & fifth nearest neighbor $(0,0)$ - $(2,2)$\\
-  $K_6$ & four spins on a plaquette $(1,0)$ - $(1,1)$ - $(0,1)$ - $(0,0)$\\
- $K_7$ & four spins on a sublattice plaquette $(2,0)$ - $(0,2)$ - $(-2,0)$ - $(0,-2)$\\
+ $K_3$ & four spins on a plaquette $(1,0)$ - $(1,1)$ - $(0,1)$ - $(0,0)$\\
+ $K_4$ & third nearest neighbor $(0,0)$ - $(2,0)$\\
+ $K_5$ & fourth nearest neighbor $(0,0)$ - $(2,1)$\\
+ $K_6$ & four spins on a sublattice plaquette $(2,0)$ - $(0,2)$ - $(-2,0)$ - $(0,-2)$\\
+ $K_7$ & fifth nearest neighbor $(0,0)$ - $(2,2)$\\
  \hline
  \end{tabular}
  \caption{\label{even}First few even short range coupling constants that may be used in the RG analysis to find $y_T$}
 \end{table}
 
-The odd coupling constants that are considered in the RG analysis
-are given in Table.~\ref{odd}. 
+The odd coupling constants that are one-by-one added to the RG analysis are given in Table ~\ref{odd}. 
 
 \begin{table}[H]
 \centering
@@ -139,7 +148,7 @@ are given in Table.~\ref{odd}.
  \hline
 \multicolumn{2}{|c|}{Odd couplings} \\ 
  \hline
- Notation & Meaning\\
+ Name & Meaning\\
  \hline
  $K_1$ & Magnetization $(0,0)$\\
  $K_2$ & Three spins on a plaquette $(0,0)$ - $(1,0)$ - $(1,1)$\\
@@ -150,21 +159,41 @@ are given in Table.~\ref{odd}.
  \caption{\label{odd}First few odd short range coupling constants that may be used in the RG analysis to find $y_H$}
 \end{table}
 
-\section{Thermal Eigenvalue Results}
+In summary, we are interested in how the size of lattice $L$, the number of $RG$ iterations $n$, and the number of coupling constants $N_c$ used in calculating $T_{\alpha\beta}$ affect the $y_T, y_H$ results we obtain from the MCRG method.
 
+\section{Results}
+All results for $y_T$ are shown in Table ~\ref{yT} below.
 \begin{table}[H]
 \centering
-\begin{tabular}{|c|c|c|c|c|c|c|} 
+\begin{tabular}{|c|c|c|c|c|c|} 
+\hline
+ \multicolumn{2}{|c|}{ }& \multicolumn{4}{c|}{Lattice size L}\\
  \hline
- &$L$ & 64 & 32 & 16 & 8 &4 \\ 
+ $n$ & $N_c$ & 64 & 32 & 16 & 8 \\
  \hline
- Nc& & $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$ \\ 
+ 1 & 1 & & 0.90788777& 0.89635236 & 0.88213852\\
+ 1 & 2 & & 0.9656497 & 0.96172657 & 0.95997822\\
+ 1 & 3 & & 0.96821987& 0.96560534 & 0.96333859\\
+ 1 & 4 & & 0.96974414 & 0.96185282 & 0.95932521\\
+ 1 & 5 & & 0.96872342 & 0.96075818 & 0.96106577\\
+ 1 & 6 & & 0.96883716 & 0.96134885 & 0.96105902\\
+ 1 & 7 & & 0.96684275 & 0.96791929 & 0.96185279\\
  \hline
- \# of measurement steps $N_{meas}$& & $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$ \\
+ 2 & 1 & & & & 0.88213852\\
+ 2 & 2 & & & & 0.95997822\\
+ 2 & 3 & & & & 0.96333859\\
+ 2 & 4 & & & & 0.95932521\\
+ 2 & 5 & & & & 0.96106577\\
+ 2 & 6 & & & & 0.96105902\\
+ 2 & 7 & & & & 0.96185279\\
  \hline
- \# of MC steps between measurements $\Delta_N$& & \multicolumn{5}{c|}{10}\\
- \hline
- \# of samples $N_{data} = N_{meas}/\Delta_{N}$  & & $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$ \\
+ 3 & 1 & & & & 0.88213852\\
+ 3 & 2 & & & & 0.95997822\\
+ 3 & 3 & & & & 0.96333859\\
+ 3 & 4 & & & & 0.95932521\\
+ 3 & 5 & & & & 0.96106577\\
+ 3 & 6 & & & & 0.96105902\\
+ 3 & 7 & & & & 0.96185279\\
  \hline
  \end{tabular}
  \caption{\label{yT}thermal eigenvalue
@@ -172,22 +201,33 @@ exponent $y_T$ as a function of the number of RG iterations $N_r$, the number of
 constants in the RG analysis $N_c$}
 \end{table}
 
+From the above, we can see that: 
 
-\section{Magnetic Eigenvalue Results}
+
+All results for $y_H$ are shown in Table ~\ref{yH} below.
 
 \begin{table}[H]
 \centering
-\begin{tabular}{|c|c|c|c|c|c|c|} 
+\begin{tabular}{|c|c|c|c|c|c|} 
+\hline
+ \multicolumn{2}{|c|}{ }& \multicolumn{4}{c|}{Lattice size L}\\
  \hline
- &$L$ & 64 & 32 & 16 & 8 &4 \\ 
+ $n$ & $N_c$ & 64 & 32 & 16 & 8 \\
  \hline
- Nc& & $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$ \\ 
+ 1 & 1 & & 1.88090467 & 1.8793387 & 1.87620229\\
+ 1 & 2 & & 1.88051803 & 1.87969459 & 1.8788031\\
+ 1 & 3 & & 1.88052089 & 1.87973553 & 1.87884904\\
+ 1 & 4 & & 1.88090765 & 1.88016303 & 1.87917633\\
  \hline
- \# of measurement steps $N_{meas}$& & $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$ \\
+ 2 & 1 & & & & \\
+ 2 & 2 & & & & 0.95997822\\
+ 2 & 3 & & & & 0.96333859\\
+ 2 & 4 & & & & 0.95932521\\
  \hline
- \# of MC steps between measurements $\Delta_N$& & \multicolumn{5}{c|}{10}\\
- \hline
- \# of samples $N_{data} = N_{meas}/\Delta_{N}$  & & $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$& $1\times 10^4$ \\
+ 3 & 1 & & & & 0.88213852\\
+ 3 & 2 & & & & 0.95997822\\
+ 3 & 3 & & & & 0.96333859\\
+ 3 & 4 & & & & 0.95932521\\
  \hline
  \end{tabular}
  \caption{\label{yH}thermal eigenvalue
@@ -195,6 +235,7 @@ exponent $y_T$ as a function of the number of RG iterations $N_r$, the number of
 constants in the RG analysis $N_c$}
 \end{table}
 
+From the above, we can see that: 
 
 \bibliographystyle{ieeetr}
 \bibliography{paperref}

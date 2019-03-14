@@ -187,6 +187,7 @@ def RunMCRG(K,h):
             
         # take measurements every (interval) steps if finished warmup
         if n % interval == 0 and n >= nwarm:
+            print('iteration', n)
             S1 = RGTransform(S,b);
             evenK += AllEvenCoupling(S)
             evenK_1 += AllEvenCoupling(S1)

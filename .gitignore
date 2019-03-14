@@ -14,3 +14,7 @@
 
 ## Exclude reference papers
 *.pdf
+
+## Exclude ipython notebooks
+*.ipynb
+.ipynb_checkpoints/

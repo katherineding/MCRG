@@ -8,7 +8,6 @@ from __future__ import division #safeguard against evil floor division
 import numpy as np
 from scipy import linalg as la
 import matplotlib.pyplot as plt
-np.set_printoptions(linewidth=90)
 
 ### Block spin transform, scale factor = b 
 
@@ -286,6 +285,7 @@ print("Number of measurement Monte Carlo sweeps:", nmeas )
 print("Interval between data measurements:", interval)
 print("Saving results to:","data/"+filename+'.txt')
 print("================ RUNNING ======================")
+
 ## GO!
 MatA_even, MatC_even, MatA_odd, MatC_odd = RunMCRG(K,h)
 
@@ -305,25 +305,26 @@ print("y_h array = ", yh_arr)
 
 
 #WRITE DATA TO TEXT FILE
-f = open("data/"+filename+'.txt','w')
-print("================== SETTINGS ==================",file= f)
-print("L = ", L, "\n",file = f)
-print("K = ", K, "\n",file = f)
-print("h = ", h, "\n",file = f)
-print("b = ", b, "\n",file = f)
-print("nwarm = ", nwarm, "\n",file = f)
-print("nmeas = ", nmeas, "\n",file = f)
-print("interval = ", interval, "\n",file = f)
-print("ndata = ", ndata, "\n",file = f)
-print("================== RESULTS ===================", file = f)
+f = open("data/"+filename+'.txt','a')
+print("======================= SETTINGS =======================",file= f)
+print("L = ", L, file = f)
+print("K = ", K, file = f)
+print("h = ", h, file = f)
+print("b = ", b, file = f)
+print("nwarm = ", nwarm, file = f)
+print("nmeas = ", nmeas, file = f)
+print("interval = ", interval, file = f)
+print("ndata = ", ndata, '\n', file = f)
+print("======================== RESULTS ========================", file = f)
 print("avg cluster size = ",np.mean(clustersize)/Ns, '*', Ns, "\n",file = f)
 print("y_t array = ", yt_arr,"\n",file = f)
 print("y_h array = ", yh_arr,"\n",file = f)
-print("================== SANITY CHECK ===================", file = f)
+print("======================= SANITY CHECK ====================", file = f)
 print('MatA_even (lhs) = ',MatA_even, "\n",file = f)
 print('MatC_even (rhs) = ',MatC_even, "\n",file = f)
 print('MatA_odd (lhs) = ',MatA_odd, "\n",file = f)
 print('MatC_odd (rhs) = ',MatC_odd, "\n",file = f)
+print('\n\n\n\n\n',file = f)
 f.close()
 
 

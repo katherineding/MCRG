@@ -91,13 +91,13 @@ For the standard Monte Carlo part, I choose to use Wolff's Algorithm~\cite{Wolff
  \hline
  Lattice linear dimension $L$ & 64 & 32 & 16 & 8 \\ 
  \hline
- \# of burn-in steps $N_{warm}$ & $2\times 10^4$& $1\times 10^4$& $0.5\times 10^4$& $0.5\times 10^4$ \\ 
+ \# of burn-in steps $N_{warm}$ & $1\times 10^4$& $1\times 10^4$& $0.5\times 10^4$& $0.5\times 10^4$ \\ 
  \hline
- \# of measurement steps $N_{meas}$& $50\times 10^4$& $40\times 10^4$& $150\times 10^4$& $150\times 10^4$\\
+ \# of measurement steps $N_{meas}$& $300\times 10^4$& $150\times 10^4$& $150\times 10^4$& $150\times 10^4$\\
  \hline
- \# of MC steps between measurements $\Delta_N$ & 10 & 8 & 5 & 10 \\
+ \# of MC steps between measurements $\Delta_N$ & 20 & 10 & 10 & 10 \\
  \hline
- \# of samples $N_{data} = N_{meas}/\Delta_{N}$ & $5\times 10^4$& $\times 10^4$& $15\times 10^4$& $15\times 10^4$ \\
+ \# of samples $N_{data} = N_{meas}/\Delta_{N}$ & $15\times 10^4$& $15 \times 10^4$& $15\times 10^4$& $15\times 10^4$ \\
  \hline
  \end{tabular}
  \caption{\label{MCSettings}Monte Carlo simulation settings}
@@ -164,7 +164,7 @@ The odd coupling constants that are one-by-one added to the RG analysis are give
 In summary, we are interested in how the size of lattice $L$, the number of $RG$ iterations $n$, and the number of coupling constants $N_c$ used in calculating $T_{\alpha\beta}$ affect the $y_T, y_H$ results we obtain from the MCRG method.
 
 \section{Results}
-All results for $y_T$ are shown in Table ~\ref{yT} below.
+All results for $y_T$ are shown in Table~\ref{yT} below. Uncertainties are obtained via averaging exponent values obtained over 5 independently seeded Monte Carlo runs.
 \begin{table}[H]
 \centering
 \begin{tabular}{|c|c|c|c|c|c|} 
@@ -173,13 +173,13 @@ All results for $y_T$ are shown in Table ~\ref{yT} below.
  \hline
  $n$ & $N_c$ & 64 & 32 & 16 & 8 \\
  \hline
- 1 & 1 & & 0.90788777& 0.899(2) & 0.884(2)\\
- 1 & 2 & & 0.9656497 & 0.968(2)& 0.959(2)\\
- 1 & 3 & & 0.96821987& 0.969(1) & 0.960(3)\\
- 1 & 4 & & 0.96974414 & 0.968(2) & 0.960(4)\\
- 1 & 5 & & 0.96872342 & 0.967(2) & 0.955(6)\\
- 1 & 6 & & 0.96883716 & 0.968(2) & 0.955(6)\\
- 1 & 7 & & 0.96684275 & 0.967(3) & 0.952(5)\\
+ 1 & 1 & & 0.902(1)& 0.899(2) & 0.884(2)\\
+ 1 & 2 & & 0.963(1) & 0.968(2)& 0.959(2)\\
+ 1 & 3 & & 0.965(2)& 0.969(1) & 0.960(3)\\
+ 1 & 4 & & 0.966(3) & 0.968(2) & 0.960(4)\\
+ 1 & 5 & & 0.965(3) & 0.967(2) & 0.955(6)\\
+ 1 & 6 & & 0.966(3) & 0.968(2) & 0.955(6)\\
+ 1 & 7 & & 0.965(3) & 0.967(3) & 0.952(5)\\
  \hline
  2 & 1 & & & & 0.88213852\\
  2 & 2 & & & & 0.95997822\\
@@ -216,10 +216,10 @@ All results for $y_H$ are shown in Table ~\ref{yH} below.
  \hline
  $n$ & $N_c$ & 64 & 32 & 16 & 8 \\
  \hline
- 1 & 1 & & 1.88090467 & 1.8795(2) & 1.8766(6) \\
- 1 & 2 & & 1.88051803 & 1.8800(2) & 1.8793(6)\\
- 1 & 3 & & 1.88052089 & 1.8800(3) & 1.8793(6)\\
- 1 & 4 & & 1.88090765 & 1.8804(3) & 1.8798(6)\\
+ 1 & 1 & & 1.8807(1) & 1.8795(2) & 1.8766(6) \\
+ 1 & 2 & & 1.8803(1) & 1.8800(2) & 1.8793(6)\\
+ 1 & 3 & & 1.8803(1) & 1.8800(3) & 1.8793(6)\\
+ 1 & 4 & & 1.8806(1) & 1.8804(3) & 1.8798(6)\\
  \hline
  2 & 1 & & & & \\
  2 & 2 & & & & 0.95997822\\

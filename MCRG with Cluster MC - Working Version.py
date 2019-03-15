@@ -158,12 +158,12 @@ def RunMCRG(K,h):
 
     #measurement accumulators for y_t
     evenK = np.zeros(7,dtype = float)
-    evenK_1 = np.zeros(7,dtype = float)
+    evenK_new = np.zeros(7,dtype = float)
     mix_11 = np.zeros((7,7),dtype=float)
     mix_01 = np.zeros((7,7),dtype=float)
     #measurement accumulators for y_h
     oddK = np.zeros(4,dtype = float)
-    oddK_1 = np.zeros(4,dtype = float)
+    oddK_new = np.zeros(4,dtype = float)
     mix_11_odd = np.zeros((4,4),dtype=float)
     mix_01_odd = np.zeros((4,4),dtype=float)
     
@@ -185,45 +185,97 @@ def RunMCRG(K,h):
         # take measurements every (interval) steps if finished warmup
         if n % interval == 0 and n >= nwarm:
             if n % 100 == 0:
+                #monitor progress
                 print("iteration",n)
-            S1 = RGTransform(S,b);
-            evenK += AllEvenCoupling(S)
-            evenK_1 += AllEvenCoupling(S1)
-            oddK += AllOddCoupling(S)
-            oddK_1 += AllOddCoupling(S1)
-            #A*B = C, B is unknown, A is symmetric
-            #Problem: C is not symmetric!?
-            mix_11 += np.outer(AllEvenCoupling(S1),AllEvenCoupling(S1))
-            mix_01 += np.outer(AllEvenCoupling(S1),AllEvenCoupling(S))
-            mix_11_odd += np.outer(AllOddCoupling(S1),AllOddCoupling(S1))
-            mix_01_odd += np.outer(AllOddCoupling(S1),AllOddCoupling(S))
+            if layer == 1:
+                S1 = RGTransform(S,b);
+                evenK += AllEvenCoupling(S)
+                evenK_new += AllEvenCoupling(S1)
+                oddK += AllOddCoupling(S)
+                oddK_new += AllOddCoupling(S1)
+                #A*B = C, B is unknown, A is symmetric
+                #Problem: C is not symmetric!?
+                mix_11 += np.outer(AllEvenCoupling(S1),AllEvenCoupling(S1))
+                mix_01 += np.outer(AllEvenCoupling(S1),AllEvenCoupling(S))
+                mix_11_odd += np.outer(AllOddCoupling(S1),AllOddCoupling(S1))
+                mix_01_odd += np.outer(AllOddCoupling(S1),AllOddCoupling(S))
+
+            elif layer == 2:
+                assert L > 8, "Lattice too small"
+                S1 = RGTransform(S,b);
+                S2 = RGTransform(S1,b);
+                evenK += AllEvenCoupling(S1)
+                evenK_new += AllEvenCoupling(S2)
+                oddK += AllOddCoupling(S1)
+                oddK_new += AllOddCoupling(S2)
+                #A*B = C, B is unknown, A is symmetric
+                #Problem: C is not symmetric!?
+                mix_11 += np.outer(AllEvenCoupling(S2),AllEvenCoupling(S2))
+                mix_01 += np.outer(AllEvenCoupling(S2),AllEvenCoupling(S1))
+                mix_11_odd += np.outer(AllOddCoupling(S2),AllOddCoupling(S2))
+                mix_01_odd += np.outer(AllOddCoupling(S2),AllOddCoupling(S1))
+
+            elif layer == 3:
+                assert L > 16, "Lattice too small"
+                S1 = RGTransform(S,b);
+                S2 = RGTransform(S1,b);
+                S3 = RGTransform(S2,b);
+                evenK += AllEvenCoupling(S2)
+                evenK_new += AllEvenCoupling(S3)
+                oddK += AllOddCoupling(S2)
+                oddK_new += AllOddCoupling(S3)
+                #A*B = C, B is unknown, A is symmetric
+                #Problem: C is not symmetric!?
+                mix_11 += np.outer(AllEvenCoupling(S3),AllEvenCoupling(S3))
+                mix_01 += np.outer(AllEvenCoupling(S3),AllEvenCoupling(S2))
+                mix_11_odd += np.outer(AllOddCoupling(S3),AllOddCoupling(S3))
+                mix_01_odd += np.outer(AllOddCoupling(S3),AllOddCoupling(S2))
+
+            elif layer == 4:
+                assert L > 32, "Lattice too small"
+                S1 = RGTransform(S,b);
+                S2 = RGTransform(S1,b);
+                S3 = RGTransform(S2,b);
+                S4 = RGTransform(S3,b);
+                evenK += AllEvenCoupling(S3)
+                evenK_new += AllEvenCoupling(S4)
+                oddK += AllOddCoupling(S3)
+                oddK_new += AllOddCoupling(S4)
+                #A*B = C, B is unknown, A is symmetric
+                #Problem: C is not symmetric!?
+                mix_11 += np.outer(AllEvenCoupling(S4),AllEvenCoupling(S4))
+                mix_01 += np.outer(AllEvenCoupling(S4),AllEvenCoupling(S3))
+                mix_11_odd += np.outer(AllOddCoupling(S4),AllOddCoupling(S4))
+                mix_01_odd += np.outer(AllOddCoupling(S4),AllOddCoupling(S3))
+            else:
+                raise ValueError("too many RG iterations")
                        
     #Results
-    evenK /= ndata; evenK_1 /= ndata; mix_11 /= ndata; mix_01 /= ndata;
-    oddK /= ndata; oddK_1 /= ndata; mix_11_odd /= ndata; mix_01_odd /= ndata;
+    evenK /= ndata; evenK_new /= ndata; mix_11 /= ndata; mix_01 /= ndata;
+    oddK /= ndata; oddK_new /= ndata; mix_11_odd /= ndata; mix_01_odd /= ndata;
 
     print('evenK = ',evenK)
-    print('evenK_1 = ', evenK_1)
+    print('evenK_new = ', evenK_new)
     print('mix_11 = ', mix_11)
-    print('subtract ',np.outer(evenK_1,evenK_1))
+    print('subtract ',np.outer(evenK_new,evenK_new))
     print('mix_01 = ', mix_01)
-    print('subtract ',np.outer(evenK_1,evenK))
-    MatA_even = mix_11-np.outer(evenK_1,evenK_1)
-    MatC_even = mix_01-np.outer(evenK_1,evenK)
+    print('subtract ',np.outer(evenK_new,evenK))
+    MatA_even = mix_11-np.outer(evenK_new,evenK_new)
+    MatC_even = mix_01-np.outer(evenK_new,evenK)
     print('MatA_even (lhs) = ',MatA_even)
     print('MatC_even (rhs) = ',MatC_even)
     print('\n')
 
     
     print('oddK = ',oddK)
-    print('oddK_1 = ', oddK_1)
+    print('oddK_new = ', oddK_new)
     print('mix_11 = ', mix_11_odd)
-    print('subtract ', np.outer(oddK_1,oddK_1))
+    print('subtract ', np.outer(oddK_new,oddK_new))
     print('mix_01 = ', mix_01_odd)
-    print('subtract ', np.outer(oddK_1,oddK))
+    print('subtract ', np.outer(oddK_new,oddK))
     #TODO: cancellation bad, how to avoid?
-    MatA_odd = mix_11_odd-np.outer(oddK_1,oddK_1)
-    MatC_odd = mix_01_odd-np.outer(oddK_1,oddK)
+    MatA_odd = mix_11_odd-np.outer(oddK_new,oddK_new)
+    MatC_odd = mix_01_odd-np.outer(oddK_new,oddK)
     print('MatA_odd (lhs) = ',MatA_odd)
     print('MatC_odd (rhs) = ',MatC_odd)
     print('\n')
@@ -255,18 +307,21 @@ K = Kc; h = 0; #Start on Critical manifold'''
 
 # READ SETTINGS FROM FILE
 lines = [line.rstrip('\n') for line in open('setting.txt')]
+
 # Lattice and MC Parameters, Output File name
 L = int(lines[0])
 nwarm = int(lines[1]); 
 nmeas = int(lines[2]);
 interval = int(lines[3]);
-filename = lines[4]
+filename = lines[5]
+print(lines)
 # Start on Critical manifold
 Kc = np.arccosh(3)/4; # Critical temperature Kc assumed to be known
 K = Kc; h = 0; 
 
 # RG analysis setting
 b = 2; 
+layer = int(lines[4]); #How many layers of MCRG to do
 
 # Derived constants
 Ns = L*L; #total number of grid points
@@ -280,6 +335,7 @@ S = np.random.choice([-1,1],(L,L))
 
 print("=========== SETTINGS FROM FILE ==================")
 print("Linear Dimension of Lattice:", L )
+print("How many layers of RG Transformations? ", layer )
 print("Number of warm up Monte Carlo sweeps:", nwarm )
 print("Number of measurement Monte Carlo sweeps:", nmeas )
 print("Interval between data measurements:", interval)
@@ -311,12 +367,13 @@ print("L = ", L, file = f)
 print("K = ", K, file = f)
 print("h = ", h, file = f)
 print("b = ", b, file = f)
+print("layer = ", layer, file = f)
 print("nwarm = ", nwarm, file = f)
 print("nmeas = ", nmeas, file = f)
 print("interval = ", interval, file = f)
 print("ndata = ", ndata, '\n', file = f)
 print("======================== RESULTS ========================", file = f)
-print("avg cluster size = ",np.mean(clustersize)/Ns, '*', Ns, "\n",file = f)
+print("Mean Wolff cluster size = ",np.mean(clustersize)/Ns, '*', Ns, "\n",file = f)
 print("y_t array = ", yt_arr,"\n",file = f)
 print("y_h array = ", yh_arr,"\n",file = f)
 print("======================= SANITY CHECK ====================", file = f)
@@ -324,6 +381,7 @@ print('MatA_even (lhs) = ',MatA_even, "\n",file = f)
 print('MatC_even (rhs) = ',MatC_even, "\n",file = f)
 print('MatA_odd (lhs) = ',MatA_odd, "\n",file = f)
 print('MatC_odd (rhs) = ',MatC_odd, "\n",file = f)
+print("=========================== END =========================", file = f)
 print('\n\n\n\n\n',file = f)
 f.close()
 

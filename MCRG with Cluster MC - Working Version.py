@@ -8,7 +8,7 @@ from __future__ import division #safeguard against evil floor division
 import numpy as np
 from scipy import linalg as la
 import matplotlib.pyplot as plt
-
+np.set_printoptions(linewidth=90)
 
 ### Block spin transform, scale factor = b 
 
@@ -179,7 +179,7 @@ def RunMCRG(K,h):
             
         #Sanity checks
         if n % interval == 0:
-            energy[k] = Energy(S);
+            #energy[k] = Energy(S);
             clustersize[k] = len(cluster);
             k = k+1   
             
@@ -234,32 +234,37 @@ def RunMCRG(K,h):
 
 
 def getExponent(MatA,MatC,Nc):
-    '''get thermal or magnetic exponent based on output of RunMCRG
+    '''Get thermal or magnetic exponent based on output of RunMCRG
     and desired number of coupling constants to consider Nc'''
     LinRGMat = la.solve(MatA[0:Nc,0:Nc],MatC[0:Nc,0:Nc])
-    #print('linearized RG transformation = ',LinRGMat)
     lmbd = la.eigvals(LinRGMat);
-    #print('eigenvalues are',lmbd)
     amplitude = np.absolute(lmbd)
-    #print('eigenvalue amplitudes are',amplitude)
-    #Only the eigenvalue with maximum amplitude is important.
-    #This eigenvalue should generically be real
     imax = np.argmax(amplitude)
     y = np.log(lmbd[imax])/np.log(b)
-    #print('exponent y = ',y,'\n')
     return y
 
 ## Test for specific set of input parameters
 
-
-# Lattice and MC Parameters, Output File name
+'''# Interactive
 L = int(input("Linear Dimension of Lattice: ")); 
-Kc = np.arccosh(3)/4; # Critical temperature Kc assumed to be known
-K = Kc; h = 0; #Start on Critical manifold
 nwarm = int(input("number of warm up Monte Carlo sweeps:")); 
 nmeas = int(input("number of measurement Monte Carlo sweeps:"));
 interval = int(input("interval between data measurements: "));
 filename = input('file name for output data: ')
+Kc = np.arccosh(3)/4; # Critical temperature Kc assumed to be known
+K = Kc; h = 0; #Start on Critical manifold'''
+
+# READ SETTINGS FROM FILE
+lines = [line.rstrip('\n') for line in open('setting.txt')]
+# Lattice and MC Parameters, Output File name
+L = int(lines[0])
+nwarm = int(lines[1]); 
+nmeas = int(lines[2]);
+interval = int(lines[3]);
+filename = lines[4]
+# Start on Critical manifold
+Kc = np.arccosh(3)/4; # Critical temperature Kc assumed to be known
+K = Kc; h = 0; 
 
 # RG analysis setting
 b = 2; 
@@ -274,12 +279,15 @@ clustersize = np.zeros((nmeas+nwarm)//interval,dtype=int)
 #Initialize 2d spin field
 S = np.random.choice([-1,1],(L,L))
 
-
+print("=========== SETTINGS FROM FILE ==================")
+print("Linear Dimension of Lattice:", L )
+print("Number of warm up Monte Carlo sweeps:", nwarm )
+print("Number of measurement Monte Carlo sweeps:", nmeas )
+print("Interval between data measurements:", interval)
+print("Saving results to:","data/"+filename+'.txt')
+print("================ RUNNING ======================")
 ## GO!
 MatA_even, MatC_even, MatA_odd, MatC_odd = RunMCRG(K,h)
-
-#plt.plot(energy)
-#plt.plot(clustersize)
 
 yt_arr = np.empty(7, dtype = complex);
 yh_arr = np.empty(4, dtype = complex);
@@ -290,6 +298,7 @@ for i in np.arange(7):
 for i in np.arange(4):
     yh_arr[i] = getExponent(MatA_odd,MatC_odd,i+1)
 
+print("==================== RESULTS ======================")
 print("mean cluster size as fraction of lattice size: ",np.mean(clustersize)/Ns)
 print("y_t array = ", yt_arr)
 print("y_h array = ", yh_arr)
@@ -308,12 +317,13 @@ print("interval = ", interval, "\n",file = f)
 print("ndata = ", ndata, "\n",file = f)
 print("================== RESULTS ===================", file = f)
 print("avg cluster size = ",np.mean(clustersize)/Ns, '*', Ns, "\n",file = f)
+print("y_t array = ", yt_arr,"\n",file = f)
+print("y_h array = ", yh_arr,"\n",file = f)
+print("================== SANITY CHECK ===================", file = f)
 print('MatA_even (lhs) = ',MatA_even, "\n",file = f)
 print('MatC_even (rhs) = ',MatC_even, "\n",file = f)
 print('MatA_odd (lhs) = ',MatA_odd, "\n",file = f)
 print('MatC_odd (rhs) = ',MatC_odd, "\n",file = f)
-print("y_t array = ", yt_arr,"\n",file = f)
-print("y_h array = ", yh_arr,"\n",file = f)
 f.close()
 
 

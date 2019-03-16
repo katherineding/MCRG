@@ -1,6 +1,6 @@
-16
-5000
+64
+10000
 300000
-10
-2
-size16_2layer_cluster
+20
+1
+size64_1layer_cluster
